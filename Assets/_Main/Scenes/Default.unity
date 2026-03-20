@@ -1413,9 +1413,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4321b2fbd6aee81439cc5cded16186ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Main.Character.PlayerCharacter
-  speed: 30
+  speed: 50
   moveDir: {x: 0, y: 0}
   rb2d: {fileID: 414518173}
+  fishID: Player
   audioSource: {fileID: 414518175}
   eatSound: {fileID: 8300000, guid: 3df7be58213e0a945bff27dde3705f21, type: 3}
   mouthPos: {fileID: 120720312}
@@ -1491,7 +1492,7 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDamping: 0.5
+  m_LinearDamping: 2
   m_AngularDamping: 0
   m_GravityScale: 0
   m_Material: {fileID: 0}
