@@ -1,3 +1,4 @@
+using Main.Analytic;
 using NaughtyAttributes;
 using Unity.Mathematics;
 using UnityEngine;
@@ -31,6 +32,8 @@ namespace Main.Character.AI
 
         protected override void Eat(Fish targetFish)
         {
+            AnalyticManager.Instance.AddAteFishRecord(targetFish);
+
             base.Eat(targetFish);
             CurrentState = State.Idle;
             FocusingTime = 0f;

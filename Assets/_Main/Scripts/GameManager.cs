@@ -1,3 +1,4 @@
+using Main.Analytic;
 using Main.Character;
 using Main.Character.AI;
 using Main.Menu;
@@ -8,6 +9,7 @@ using Main.WorldStage;
 using NaughtyAttributes;
 using PrimeTween;
 using Unity.Cinemachine;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -69,6 +71,8 @@ namespace Main
         [SerializeField]
         private string loseSceneName = "LoseScene";
 
+        private float startTime;
+
         private void Awake()
         {
             Instance = this;
@@ -125,6 +129,7 @@ namespace Main
             }
 
             Debug.Log("[GameManager] Started Game");
+            startTime = Time.time;
         }
 
         private void EndGame()
@@ -177,6 +182,14 @@ namespace Main
         [Button]
         private void NextState()
         {
+            var levelId = worldStage.GetCurrentStage().name;
+            var completeDuration = Time.time - startTime;
+
+            // Send Record
+            AnalyticManager.Instance.SendRecordDashUsage(levelId);
+            AnalyticManager.Instance.SendRecordProgression(levelId);
+            AnalyticManager.Instance.SendTimeToCompleteLevel(levelId, completeDuration);
+
             if (TransitionManager.Instance.CurrentSequence.isAlive)
                 return;
 

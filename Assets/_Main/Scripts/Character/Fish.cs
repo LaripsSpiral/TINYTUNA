@@ -1,11 +1,16 @@
 using System;
 using UnityEngine;
+using UnityEngine.XR;
 
 namespace Main.Character
 {
     [RequireComponent(typeof(AudioSource))]
     public class Fish : BaseCharacter
     {
+        [SerializeField]
+        private string fishID;
+        public string FishID => fishID;
+
         [SerializeField]
         protected AudioSource audioSource;
 
@@ -28,6 +33,8 @@ namespace Main.Character
 
         private void OnValidate()
         {
+            //fishID = name;
+
             audioSource ??= GetComponent<AudioSource>();
             audioSource.playOnAwake = false;
         }

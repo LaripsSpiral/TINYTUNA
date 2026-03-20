@@ -1,3 +1,4 @@
+using Main.Analytic;
 using Main.Score;
 using Main.Times;
 using NaughtyAttributes;
@@ -75,6 +76,8 @@ namespace Main.Character
             if (!CanDash)
                 return false;
 
+            RecordDash();
+
             Vector2 dir = moveDir.normalized;
             if (dir == Vector2.zero)
             {
@@ -101,6 +104,83 @@ namespace Main.Character
             }
 
             return true;
+        }
+
+        private void RecordDash()
+        {
+            // Determine dash direction
+            Vector2 dir = moveDir.normalized;
+            if (dir == Vector2.zero)
+            {
+                if (Rb2d != null && Rb2d.linearVelocity.sqrMagnitude > 0.1f)
+                    dir = Rb2d.linearVelocity.normalized;
+                else
+                    dir = transform.right;
+            }
+
+            // Detection parameters
+            const float detectionRadius = 2.0f; // radius to look for nearby fishes (tunable)
+            const float forwardConeCos = 0.7f;  // cos(45deg) ~ 0.707; a fish with dot >= this is roughly in front
+
+            DashType type = DashType.Movement;
+
+            // Find nearby colliders
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, detectionRadius);
+            if (hits != null && hits.Length > 0)
+            {
+                bool foundAteCandidate = false;
+                bool foundThreat = false;
+
+                foreach (var col in hits)
+                {
+                    if (col == null || col.attachedRigidbody == null)
+                        continue;
+
+                    var rb = col.attachedRigidbody;
+
+                    // Skip self
+                    if (rb.gameObject == gameObject)
+                        continue;
+
+                    if (rb.TryGetComponent(out Fish otherFish))
+                    {
+                        float otherSize = otherFish.GetSize();
+                        float mySize = GetSize();
+
+                        Vector2 toOther = (rb.position - (Vector2)transform.position);
+                        float dist = toOther.magnitude;
+                        if (dist <= Mathf.Epsilon)
+                            continue;
+
+                        Vector2 toOtherDir = toOther.normalized;
+                        float forwardDot = Vector2.Dot(dir, toOtherDir);
+
+                        // If there's a smaller fish roughly in front within the detection radius,
+                        // assume dash was intended to eat (Ate).
+                        if (otherSize < mySize && forwardDot >= forwardConeCos)
+                        {
+                            foundAteCandidate = true;
+                            break; // Prefer Ate, no need to search further
+                        }
+
+                        // If there's a larger fish nearby, consider this a possible flee dash.
+                        if (otherSize > mySize && dist <= detectionRadius)
+                        {
+                            // Optionally check if the larger fish is close enough or roughly in pursuit direction.
+                            foundThreat = true;
+                        }
+                    }
+                }
+
+                if (foundAteCandidate)
+                    type = DashType.Ate;
+                else if (foundThreat)
+                    type = DashType.Flee;
+                else
+                    type = DashType.Movement;
+            }
+
+            AnalyticManager.Instance.AddDashRecord(type);
         }
 
         private void Start()
