@@ -1413,7 +1413,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4321b2fbd6aee81439cc5cded16186ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Main.Character.PlayerCharacter
-  speed: 50
+  speed: 75
   moveDir: {x: 0, y: 0}
   rb2d: {fileID: 414518173}
   fishID: Player
@@ -1432,7 +1432,7 @@ MonoBehaviour:
   comboBuffMultiplier: 0.1
   knockBackRange: 1
   knockBackForce: 2.5
-  dashForce: 1
+  dashForce: 2
   dashCooldown: 1
 --- !u!114 &414518171
 MonoBehaviour:

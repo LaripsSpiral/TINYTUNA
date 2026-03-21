@@ -116,20 +116,36 @@ namespace Main.Character.AI
         {
             fishList.Clear();
 
-            // Add Player
-            var playerCharacter = FindAnyObjectByType<PlayerCharacter>();
-            fishList.Add(playerCharacter);
-            playerCharacter.OnDeath += () => fishList.Remove(playerCharacter);
-
-            // Add AI Fishes
-            var aiFishes = FindObjectsByType<AiFish>(sortMode: FindObjectsSortMode.None);
-            foreach (var aiFish in aiFishes)
+            // Prefer the serialized field, fallback to scene lookup for compatibility and inspector convenience
+            var player = playerCharacter != null ? playerCharacter : FindFirstObjectByType<PlayerCharacter>();
+            if (player != null)
             {
-                fishList.Add(aiFish);
-                aiFish.OnDeath += () => fishList.Remove(aiFish);
+                if (!fishList.Contains(player))
+                {
+                    fishList.Add(player);
+                    player.OnDeath += () => fishList.Remove(player);
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[AiFishManager] PlayerCharacter not assigned in inspector and not found in scene.");
             }
 
-            Debug.Log($"[AiFishManager] Fetched {aiFishes.Length} Fishes.");
+            // Use FindObjectsOfType for broader Unity version compatibility
+            var aiFishes = FindObjectsByType<AiFish>(sortMode: FindObjectsSortMode.InstanceID);
+            foreach (var aiFish in aiFishes)
+            {
+                if (aiFish == null)
+                    continue;
+
+                if (!fishList.Contains(aiFish))
+                {
+                    fishList.Add(aiFish);
+                    aiFish.OnDeath += () => fishList.Remove(aiFish);
+                }
+            }
+
+            Debug.Log($"[AiFishManager] Fetched {fishList.Count} Fishes. ({aiFishes.Length} AI)");
         }
 
         private void OnDrawGizmos()

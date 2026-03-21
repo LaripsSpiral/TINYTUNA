@@ -234,6 +234,8 @@ namespace Main.Character
 
         protected override void Eat(Fish targetFish)
         {
+            AnalyticManager.Instance.AddAteFishRecord(targetFish);
+
             int comboCount = comboSystem != null ? comboSystem.ComboCount : 0;
 
             base.Eat(targetFish);

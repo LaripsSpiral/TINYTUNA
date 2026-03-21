@@ -1,4 +1,5 @@
 using Main.Character;
+using Main.WorldStage;
 using System;
 using System.Collections.Generic;
 using Unity.Services.Analytics;
@@ -11,7 +12,7 @@ namespace Main.Analytic
     public class AnalyticManager : MonoBehaviour
     {
         private Dictionary<string, int> dashTimesByType = new();
-        private Dictionary<string, float> analyticEatenFish = new();
+        private List<CustomEvent> analyticEatenFish = new();
 
         public static AnalyticManager Instance { get; set; }
 
@@ -48,12 +49,12 @@ namespace Main.Analytic
             dashTimesByType[dashType.ToString()]++;
         }
 
-        public void SendRecordDashUsage(string worldLevel)
+        public void SendRecordDashUsage(string worldStageID)
         {
             foreach (var kvp in dashTimesByType)
             {
                 var record = new CustomEvent("DashUsage");
-                record.Add("levelID", worldLevel);
+                record.Add("levelID", worldStageID);
                 record.Add("detail", kvp.Key);
                 record.Add("UsageTimes", kvp.Value);
                 SendRecord(record);
@@ -64,32 +65,29 @@ namespace Main.Analytic
 
         public void AddAteFishRecord(Fish eatenFish)
         {
-            if (!analyticEatenFish.ContainsKey(eatenFish.FishID))
+            analyticEatenFish.Add(new("PlayerProgressionInLevels")
             {
-                analyticEatenFish.Add(eatenFish.FishID, eatenFish.GetSize());
-                return;
-            }
+                {"eatenFishID", eatenFish.FishID },
+                { "eatenFishSize", eatenFish.GetSize() },
+            });
         }
 
-        public void SendRecordProgression(string worldLevel)
+        public void SendRecordProgression(string worldStageID)
         {
-            foreach (var kvp in analyticEatenFish)
+            foreach (var customEvent in analyticEatenFish)
             {
-                var record = new CustomEvent("PlayerProgressionInLevels");
-                record.Add("levelID", worldLevel);
-                record.Add("eatenFishID", kvp.Key);
-                record.Add("eatenFishSize", kvp.Value);
-                SendRecord(record);
+                customEvent.Add("levelID", worldStageID);
+                SendRecord(customEvent);
             }
 
             analyticEatenFish.Clear();
         }
 
-        public void SendTimeToCompleteLevel(string worldLevel, float levelDuration)
+        public void SendTimeToCompleteLevel(string worldStageID, float levelDuration)
         {
             SendRecord(new("CompleteLevelTime")
             {
-                {"levelID", worldLevel},
+                {"levelID", worldStageID},
                 {"timer", levelDuration}
             });
         }

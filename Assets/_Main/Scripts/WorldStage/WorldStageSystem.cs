@@ -12,6 +12,8 @@ namespace Main.WorldStage
         [SerializeField, ReadOnly]
         private Queue<WorldStageData> worldStageQueue = new();
 
+        public WorldStageData CurrentWorldStage => worldStageQueue.Peek();
+
         [SerializeField]
         private WorldStageData[] worldStageData;
         public WorldStageData[] WorldStageData => worldStageData;
