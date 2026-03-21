@@ -1,9 +1,9 @@
 using Main.Character;
-using Main.WorldStage;
 using System;
 using System.Collections.Generic;
 using Unity.Services.Analytics;
 using Unity.Services.Core;
+using Unity.Services.Core.Environments;
 using UnityEngine;
 using UnityEngine.UnityConsent;
 
@@ -12,7 +12,7 @@ namespace Main.Analytic
     public class AnalyticManager : MonoBehaviour
     {
         private Dictionary<string, int> dashTimesByType = new();
-        private List<CustomEvent> analyticEatenFish = new();
+        private Dictionary<string, int> analyticEatenFish = new();
 
         public static AnalyticManager Instance { get; set; }
 
@@ -28,7 +28,7 @@ namespace Main.Analytic
             EndUserConsent.SetConsentState(new ConsentState
             {
                 AnalyticsIntent = ConsentStatus.Granted,
-                AdsIntent = ConsentStatus.Denied
+                AdsIntent = ConsentStatus.Denied                
             });
         }
 
@@ -65,19 +65,24 @@ namespace Main.Analytic
 
         public void AddAteFishRecord(Fish eatenFish)
         {
-            analyticEatenFish.Add(new("PlayerProgressionInLevels")
+            if (!analyticEatenFish.ContainsKey(eatenFish.FishID))
             {
-                {"eatenFishID", eatenFish.FishID },
-                { "eatenFishSize", eatenFish.GetSize() },
-            });
+                analyticEatenFish.Add(eatenFish.FishID, 1);
+                return;
+            }
+
+            analyticEatenFish[eatenFish.FishID]++;
         }
 
         public void SendRecordProgression(string worldStageID)
         {
-            foreach (var customEvent in analyticEatenFish)
+            foreach (var kvp in analyticEatenFish)
             {
-                customEvent.Add("levelID", worldStageID);
-                SendRecord(customEvent);
+                var record = new CustomEvent("PlayerProgressionInLevels");
+                record.Add("levelID", worldStageID);
+                record.Add("eatenFishID", kvp.Key);
+                record.Add("eatenFishAmount", kvp.Value);
+                SendRecord(record);
             }
 
             analyticEatenFish.Clear();

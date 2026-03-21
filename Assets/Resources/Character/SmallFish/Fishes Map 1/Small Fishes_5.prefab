@@ -109,6 +109,7 @@ MonoBehaviour:
   speed: 30
   moveDir: {x: 0, y: 0}
   rb2d: {fileID: 689752485523890227}
+  fishID: Small Fishes_5
   audioSource: {fileID: 9157945183077354150}
   eatSound: {fileID: 0}
   mouthPos: {fileID: 6810132914747389768}

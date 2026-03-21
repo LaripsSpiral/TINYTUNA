@@ -1,3 +1,4 @@
+using NaughtyAttributes;
 using System;
 using UnityEngine;
 using UnityEngine.XR;
@@ -31,10 +32,14 @@ namespace Main.Character
         [SerializeField]
         private LayerMask eatingMask;
 
+        [Button]
+        private void UpdateID()
+        {
+            fishID = name;
+        }
+
         private void OnValidate()
         {
-            //fishID = name;
-
             audioSource ??= GetComponent<AudioSource>();
             audioSource.playOnAwake = false;
         }
